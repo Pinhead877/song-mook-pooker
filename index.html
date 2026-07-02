@@ -1,0 +1,1424 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Song Mook-Pooker - Kawaii Song Guess</title>
+  <style>
+    :root {
+      --cream: #fffaf2;
+      --milk: #fffdf9;
+      --ink: #3e3548;
+      --soft-ink: #756b80;
+      --pink: #ff9fbd;
+      --pink-deep: #e96c99;
+      --mint: #85dcb8;
+      --mint-deep: #38a77c;
+      --lemon: #ffe28a;
+      --peach: #ffc6a8;
+      --blue: #9bd4ff;
+      --lavender: #cdb7ff;
+      --wrong: #d8d1dd;
+      --line: #eadfec;
+      --shadow: rgba(108, 78, 112, .18);
+      --radius: 8px;
+      color-scheme: light;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      min-height: 100%;
+    }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      color: var(--ink);
+      font-family: "Trebuchet MS", "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      background:
+        linear-gradient(90deg, rgba(255, 159, 189, .11) 1px, transparent 1px),
+        linear-gradient(rgba(155, 212, 255, .13) 1px, transparent 1px),
+        linear-gradient(135deg, #fff8e8 0%, #ffeaf3 42%, #eefaff 100%);
+      background-size: 34px 34px, 34px 34px, auto;
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    button,
+    select {
+      min-height: 42px;
+      border: 2px solid #4f4158;
+      border-radius: var(--radius);
+      background: var(--milk);
+      color: var(--ink);
+      box-shadow: 0 4px 0 #4f4158;
+      cursor: pointer;
+      transition: transform .14s ease, box-shadow .14s ease, background .14s ease, opacity .14s ease;
+    }
+
+    button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 9px 13px;
+      font-weight: 800;
+    }
+
+    button:hover:not(:disabled),
+    select:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 0 #4f4158;
+    }
+
+    button:active:not(:disabled) {
+      transform: translateY(2px);
+      box-shadow: 0 2px 0 #4f4158;
+    }
+
+    button:disabled,
+    input:disabled {
+      opacity: .55;
+      cursor: not-allowed;
+    }
+
+    :focus-visible {
+      outline: 4px solid rgba(255, 159, 189, .45);
+      outline-offset: 3px;
+    }
+
+    .app {
+      width: min(1160px, calc(100vw - 28px));
+      margin: 0 auto;
+      padding: 18px 0 38px;
+    }
+
+    .topbar {
+      display: grid;
+      gap: 14px;
+      align-items: end;
+      margin-bottom: 16px;
+    }
+
+    .brand {
+      display: grid;
+      gap: 6px;
+    }
+
+    h1 {
+      margin: 0;
+    }
+
+    .brand-title {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .04em .18em;
+      align-items: baseline;
+      max-width: 10ch;
+      color: #4f4158;
+      font-size: clamp(3.1rem, 12vw, 6.4rem);
+      font-weight: 1000;
+      line-height: .82;
+      letter-spacing: 0;
+      text-shadow: 4px 4px 0 #ffd6e6, 8px 8px 0 rgba(155, 212, 255, .62);
+    }
+
+    .brand-title span {
+      position: relative;
+      display: inline-block;
+    }
+
+    .brand-title .song {
+      transform: rotate(-1.5deg);
+    }
+
+    .brand-title .mook {
+      padding-right: .03em;
+      color: var(--pink-deep);
+      -webkit-text-stroke: 2px #4f4158;
+      text-stroke: 2px #4f4158;
+      transform: rotate(.9deg) translateY(.03em);
+    }
+
+    .brand-title .mook::after {
+      content: "";
+      position: absolute;
+      right: -.11em;
+      top: -.04em;
+      width: .22em;
+      height: .22em;
+      border: .035em solid #4f4158;
+      border-radius: 50%;
+      background: var(--lemon);
+      box-shadow: .04em .04em 0 rgba(79, 65, 88, .2);
+    }
+
+    .brand-title .dash {
+      margin: 0 -.08em;
+      color: var(--lemon);
+      -webkit-text-stroke: 2px #4f4158;
+      text-stroke: 2px #4f4158;
+      transform: rotate(2deg) translateY(-.03em);
+    }
+
+    .brand-title .pooker {
+      color: #5f4b80;
+      transform: rotate(-.6deg);
+    }
+
+    .subtitle {
+      max-width: 62ch;
+      margin: 0;
+      color: var(--soft-ink);
+      font-size: clamp(.98rem, 2vw, 1.08rem);
+      line-height: 1.45;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .primary {
+      background: var(--pink);
+    }
+
+    .secondary {
+      background: var(--blue);
+    }
+
+    .danger {
+      background: var(--peach);
+    }
+
+    .select {
+      min-width: 138px;
+      padding: 8px 10px;
+      font-weight: 800;
+    }
+
+    .shell {
+      display: grid;
+      gap: 16px;
+    }
+
+    .panel {
+      border: 2px solid #4f4158;
+      border-radius: var(--radius);
+      background: rgba(255, 253, 249, .92);
+      box-shadow: 7px 7px 0 rgba(79, 65, 88, .22);
+    }
+
+    .stage {
+      display: grid;
+      gap: 14px;
+      padding: 12px;
+    }
+
+    .art-wrap {
+      position: relative;
+      display: grid;
+      min-height: 270px;
+      aspect-ratio: 1 / 1;
+      overflow: hidden;
+      border: 2px solid #4f4158;
+      border-radius: var(--radius);
+      background:
+        linear-gradient(45deg, rgba(255, 159, 189, .16) 25%, transparent 25% 50%, rgba(255, 159, 189, .16) 50% 75%, transparent 75%),
+        linear-gradient(135deg, #fff4fb, #effaff);
+      background-size: 28px 28px, auto;
+      place-items: center;
+    }
+
+    .cover {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: blur(22px) saturate(.82) brightness(1.08);
+      transform: scale(1.17);
+      opacity: 0;
+      transition: opacity .22s ease, filter .22s ease, transform .22s ease;
+    }
+
+    .cover.is-visible {
+      opacity: .88;
+    }
+
+    .cover.is-revealed {
+      filter: none;
+      transform: scale(1);
+      opacity: 1;
+    }
+
+    .cover-mask {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      padding: 20px;
+      place-items: center;
+      text-align: center;
+      background: linear-gradient(180deg, rgba(255, 253, 249, .3), rgba(255, 234, 243, .78));
+    }
+
+    .art-wrap.is-revealed .cover-mask {
+      display: none;
+    }
+
+    .mascot {
+      display: grid;
+      width: min(170px, 58vw);
+      aspect-ratio: 1;
+      border: 2px solid #4f4158;
+      border-radius: 50%;
+      background: var(--milk);
+      box-shadow: 6px 6px 0 rgba(79, 65, 88, .2);
+      place-items: center;
+      position: relative;
+    }
+
+    .mascot::before,
+    .mascot::after {
+      content: "";
+      position: absolute;
+      top: 55px;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #4f4158;
+    }
+
+    .mascot::before {
+      left: 50px;
+    }
+
+    .mascot::after {
+      right: 50px;
+    }
+
+    .note {
+      position: relative;
+      transform: translateY(-12px);
+      width: 74px;
+      height: 74px;
+      border: 4px solid #4f4158;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at center, var(--milk) 0 9px, #4f4158 10px 13px, transparent 14px),
+        conic-gradient(from 12deg, var(--pink), var(--lemon), var(--blue), var(--lavender), var(--pink));
+      box-shadow: 4px 4px 0 rgba(79, 65, 88, .2);
+      font-size: 0;
+      }
+
+    .note::after {
+      content: "";
+      position: absolute;
+      right: 7px;
+      bottom: 12px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, .42);
+    }
+
+    .status {
+      position: absolute;
+      right: 12px;
+      bottom: 12px;
+      left: 12px;
+      margin: 0;
+      padding: 8px 10px;
+      border: 2px solid #4f4158;
+      border-radius: var(--radius);
+      background: var(--milk);
+      color: var(--soft-ink);
+      font-weight: 800;
+    }
+
+    .controls {
+      display: grid;
+      gap: 12px;
+    }
+
+    .snippet-card {
+      display: grid;
+      gap: 10px;
+      padding: 12px;
+      border: 2px dashed #d8bfd8;
+      border-radius: var(--radius);
+      background: #fff8fc;
+    }
+
+    .play-row {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .snippet-label {
+      margin: 0;
+      color: var(--soft-ink);
+      font-weight: 800;
+      text-align: center;
+    }
+
+    .progress {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 7px;
+    }
+
+    .dot {
+      height: 12px;
+      border: 2px solid #4f4158;
+      border-radius: 999px;
+      background: var(--milk);
+    }
+
+    .dot.active {
+      background: var(--blue);
+    }
+
+    .dot.used {
+      background: var(--lemon);
+    }
+
+    .dot.solved {
+      background: var(--mint);
+    }
+
+    .search {
+      position: relative;
+      display: grid;
+      gap: 10px;
+    }
+
+    .guess-row {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 9px;
+    }
+
+    input[type="search"] {
+      width: 100%;
+      min-height: 48px;
+      padding: 12px 14px;
+      border: 2px solid #4f4158;
+      border-radius: var(--radius);
+      background: var(--milk);
+      color: var(--ink);
+      box-shadow: inset 0 2px 0 rgba(79, 65, 88, .08);
+    }
+
+    .suggestions {
+      position: absolute;
+      z-index: 20;
+      top: 58px;
+      right: 0;
+      left: 0;
+      display: none;
+      max-height: 330px;
+      overflow-y: auto;
+      border: 2px solid #4f4158;
+      border-radius: var(--radius);
+      background: var(--milk);
+      box-shadow: 0 16px 35px var(--shadow);
+    }
+
+    .suggestions.open {
+      display: block;
+    }
+
+    .suggestion {
+      display: grid;
+      grid-template-columns: 50px minmax(0, 1fr);
+      gap: 10px;
+      width: 100%;
+      padding: 9px;
+      border: 0;
+      border-bottom: 1px solid var(--line);
+      background: transparent;
+      color: var(--ink);
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .suggestion:hover,
+    .suggestion.active {
+      background: #fff0f7;
+    }
+
+    .suggestion img {
+      width: 50px;
+      height: 50px;
+      border: 2px solid #4f4158;
+      border-radius: var(--radius);
+      object-fit: cover;
+    }
+
+    .suggestion strong,
+    .suggestion span {
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .suggestion strong {
+      margin-top: 2px;
+      font-size: .96rem;
+    }
+
+    .suggestion span {
+      color: var(--soft-ink);
+      font-size: .85rem;
+    }
+
+    .message {
+      min-height: 24px;
+      margin: 0;
+      color: var(--soft-ink);
+      font-weight: 800;
+      line-height: 1.4;
+    }
+
+    .message.good {
+      color: #217c5d;
+    }
+
+    .message.bad {
+      color: #b84b6f;
+    }
+
+    .answer {
+      display: none;
+      grid-template-columns: 76px minmax(0, 1fr);
+      gap: 10px;
+      align-items: center;
+      padding: 10px;
+      border: 2px solid #4f4158;
+      border-radius: var(--radius);
+      background: #f5fff9;
+    }
+
+    .answer.open {
+      display: grid;
+    }
+
+    .answer img {
+      width: 76px;
+      height: 76px;
+      border: 2px solid #4f4158;
+      border-radius: var(--radius);
+      object-fit: cover;
+    }
+
+    .answer h2 {
+      margin: 0 0 4px;
+      overflow-wrap: anywhere;
+      font-size: 1.02rem;
+      line-height: 1.15;
+    }
+
+    .answer p {
+      margin: 2px 0;
+      color: var(--soft-ink);
+      font-size: .9rem;
+      line-height: 1.3;
+    }
+
+    .answer a {
+      color: #286e9d;
+      font-weight: 900;
+    }
+
+    .board-panel {
+      padding: 12px;
+    }
+
+    .board-head {
+      display: grid;
+      grid-template-columns: 1.25fr 1fr .95fr .48fr .7fr;
+      gap: 7px;
+      margin-bottom: 8px;
+      color: var(--soft-ink);
+      font-size: .72rem;
+      font-weight: 900;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+
+    .board {
+      display: grid;
+      gap: 8px;
+    }
+
+    .try {
+      display: grid;
+      grid-template-columns: 1.25fr 1fr .95fr .48fr .7fr;
+      gap: 7px;
+    }
+
+    .chip {
+      display: flex;
+      min-height: 48px;
+      align-items: center;
+      justify-content: center;
+      padding: 7px;
+      border: 2px solid #4f4158;
+      border-radius: var(--radius);
+      background: var(--wrong);
+      color: var(--ink);
+      font-size: clamp(.72rem, 2.4vw, .9rem);
+      font-weight: 900;
+      line-height: 1.12;
+      overflow-wrap: anywhere;
+      text-align: center;
+    }
+
+    .try.empty .chip {
+      background: rgba(255, 253, 249, .74);
+      color: transparent;
+      border-style: dashed;
+    }
+
+    .chip.correct {
+      background: var(--mint);
+    }
+
+    .chip.close {
+      background: var(--lemon);
+    }
+
+    .chip.wrong {
+      background: var(--wrong);
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin: 12px 0 0;
+    }
+
+    .legend span {
+      padding: 6px 8px;
+      border: 2px solid #4f4158;
+      border-radius: var(--radius);
+      background: var(--milk);
+      color: var(--soft-ink);
+      font-size: .82rem;
+      font-weight: 900;
+    }
+
+    .footer {
+      margin: 16px 0 0;
+      color: var(--soft-ink);
+      font-size: .82rem;
+      line-height: 1.45;
+      text-align: center;
+    }
+
+    @media (min-width: 760px) {
+      .topbar {
+        grid-template-columns: 1fr auto;
+      }
+
+      .toolbar {
+        justify-content: flex-end;
+      }
+
+      .shell {
+        grid-template-columns: minmax(320px, .82fr) minmax(420px, 1.18fr);
+        align-items: start;
+      }
+
+      .stage,
+      .board-panel {
+        padding: 16px;
+      }
+
+      .play-row {
+        grid-template-columns: auto 1fr;
+      }
+
+      .snippet-label {
+        text-align: right;
+      }
+
+      .guess-row {
+        grid-template-columns: 1fr auto auto;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .app {
+        width: min(100vw - 18px, 1160px);
+        padding-top: 10px;
+      }
+
+      .toolbar,
+      .guess-row {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .toolbar .select {
+        grid-column: 1 / -1;
+        width: 100%;
+      }
+
+      .brand-title {
+        max-width: 8.4ch;
+        font-size: clamp(3rem, 17vw, 4.8rem);
+      }
+
+      .guess-row input {
+        grid-column: 1 / -1;
+      }
+
+      .board-panel {
+        overflow-x: auto;
+      }
+
+      .board-inner {
+        min-width: 610px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        scroll-behavior: auto !important;
+        transition-duration: .01ms !important;
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div class="brand">
+        <h1 class="brand-title" aria-label="Song Mook-Pooker">
+          <span class="song">Song</span>
+          <span class="mook">Mook</span>
+          <span class="dash" aria-hidden="true">-</span>
+          <span class="pooker">Pooker</span>
+        </h1>
+        <p class="subtitle">Hear a tiny preview, make a guess, and use soft little clues to find the hidden song in six tries.</p>
+      </div>
+      <div class="toolbar" aria-label="Game controls">
+        <button id="dailyBtn" class="primary" type="button">Daily</button>
+        <button id="randomBtn" class="secondary" type="button">Random</button>
+        <select id="countrySelect" class="select" aria-label="iTunes Store country">
+          <option value="US">US store</option>
+          <option value="GB">UK store</option>
+          <option value="IL">Israel store</option>
+          <option value="JP">Japan store</option>
+          <option value="ES">Spain store</option>
+        </select>
+      </div>
+    </header>
+
+    <section class="shell">
+      <section class="panel stage" aria-label="Song player and guess input">
+        <div id="artWrap" class="art-wrap">
+          <img id="cover" class="cover" alt="Hidden album art" />
+          <div class="cover-mask" aria-hidden="true">
+            <div class="mascot">
+              <div class="note"></div>
+            </div>
+            <p id="loadStatus" class="status">Loading a song...</p>
+          </div>
+        </div>
+
+        <div class="controls">
+          <div class="snippet-card">
+            <div class="play-row">
+              <button id="playBtn" class="primary" type="button" disabled>Play snippet</button>
+              <p id="snippetText" class="snippet-label">Attempt 1 gives 1 second</p>
+            </div>
+            <div id="progress" class="progress" aria-label="Attempt progress"></div>
+          </div>
+
+          <div class="search">
+            <div class="guess-row">
+              <input id="guessInput" type="search" placeholder="Search song or artist" autocomplete="off" disabled aria-autocomplete="list" aria-controls="suggestions" />
+              <button id="guessBtn" type="button" disabled>Guess</button>
+              <button id="skipBtn" class="danger" type="button" disabled>Skip</button>
+            </div>
+            <div id="suggestions" class="suggestions" role="listbox" aria-label="Song suggestions"></div>
+          </div>
+
+          <p id="message" class="message" role="status" aria-live="polite"></p>
+
+          <div id="answer" class="answer" aria-label="Answer">
+            <img id="answerArt" alt="Album artwork" />
+            <div>
+              <h2 id="answerTitle"></h2>
+              <p id="answerMeta"></p>
+              <p id="answerAlbum"></p>
+              <p><a id="answerLink" target="_blank" rel="noopener">Open on Apple Music</a></p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel board-panel" aria-label="Guess board">
+        <div class="board-inner">
+          <div class="board-head" aria-hidden="true">
+            <div>Title</div>
+            <div>Artist</div>
+            <div>Album</div>
+            <div>Year</div>
+            <div>Genre</div>
+          </div>
+          <div id="board" class="board"></div>
+          <div class="legend" aria-label="Clue legend">
+            <span>Mint: exact</span>
+            <span>Lemon: close</span>
+            <span>Cloud: miss</span>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <p class="footer">Powered by the iTunes Search API. No sign-in, no backend, no build step; this file can live directly on GitHub Pages.</p>
+  </main>
+
+  <script>
+    "use strict";
+
+    const MAX_ATTEMPTS = 6;
+    const SNIPPETS = [1, 2, 4, 7, 11, 16];
+    const SEED_TERMS = [
+      "Taylor Swift", "The Weeknd", "Billie Eilish", "Dua Lipa", "Ed Sheeran",
+      "Ariana Grande", "Coldplay", "Bruno Mars", "Lady Gaga", "Queen",
+      "Michael Jackson", "Madonna", "Beyonce", "Kendrick Lamar", "Eminem",
+      "Rihanna", "Adele", "Harry Styles", "Imagine Dragons", "Daft Punk",
+      "Nirvana", "Radiohead", "Arctic Monkeys", "The Beatles", "Fleetwood Mac",
+      "Oasis", "Sia", "Maroon 5", "Post Malone", "Olivia Rodrigo",
+      "Sabrina Carpenter", "Chappell Roan", "Miley Cyrus", "ABBA", "Elton John",
+      "David Bowie", "Prince", "Tame Impala", "Lana Del Rey", "Linkin Park"
+    ];
+
+    const state = {
+      target: null,
+      audio: new Audio(),
+      attempts: [],
+      cache: new Map(),
+      gameOver: false,
+      isPlaying: false,
+      mode: "daily",
+      playTimer: 0,
+      requestId: 0,
+      searchResults: [],
+      selectedGuess: null,
+      suggestionIndex: -1
+    };
+
+    const els = {
+      answer: document.getElementById("answer"),
+      answerAlbum: document.getElementById("answerAlbum"),
+      answerArt: document.getElementById("answerArt"),
+      answerLink: document.getElementById("answerLink"),
+      answerMeta: document.getElementById("answerMeta"),
+      answerTitle: document.getElementById("answerTitle"),
+      artWrap: document.getElementById("artWrap"),
+      board: document.getElementById("board"),
+      countrySelect: document.getElementById("countrySelect"),
+      cover: document.getElementById("cover"),
+      dailyBtn: document.getElementById("dailyBtn"),
+      guessBtn: document.getElementById("guessBtn"),
+      guessInput: document.getElementById("guessInput"),
+      loadStatus: document.getElementById("loadStatus"),
+      message: document.getElementById("message"),
+      playBtn: document.getElementById("playBtn"),
+      progress: document.getElementById("progress"),
+      randomBtn: document.getElementById("randomBtn"),
+      skipBtn: document.getElementById("skipBtn"),
+      snippetText: document.getElementById("snippetText"),
+      suggestions: document.getElementById("suggestions")
+    };
+
+    function seededRandom(seed) {
+      let value = seed % 2147483647;
+      if (value <= 0) value += 2147483646;
+      return function next() {
+        value = value * 16807 % 2147483647;
+        return (value - 1) / 2147483646;
+      };
+    }
+
+    function todaySeed() {
+      const now = new Date();
+      return Number(`${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}${String(now.getDate()).padStart(2, "0")}`);
+    }
+
+    function normalize(value) {
+      return String(value || "")
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/\([^)]*\)|\[[^\]]*\]/g, " ")
+        .replace(/\b(feat|ft|featuring|with|remaster(ed)?|radio edit|single version|explicit|clean|deluxe|bonus track|live)\b/g, " ")
+        .replace(/&/g, " and ")
+        .replace(/[^a-z0-9\s]/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+    }
+
+    function words(value) {
+      const stop = new Set(["the", "a", "an", "and", "or", "of", "to", "in", "on", "for", "with", "from", "at", "by"]);
+      return normalize(value).split(" ").filter(word => word.length > 1 && !stop.has(word));
+    }
+
+    function overlapScore(a, b) {
+      const left = new Set(words(a));
+      const right = new Set(words(b));
+      if (!left.size || !right.size) return 0;
+      let hits = 0;
+      for (const word of left) {
+        if (right.has(word)) hits += 1;
+      }
+      return hits / Math.max(left.size, right.size);
+    }
+
+    function yearOf(track) {
+      const year = track && track.releaseDate ? new Date(track.releaseDate).getFullYear() : "";
+      return Number.isFinite(year) ? year : "";
+    }
+
+    function cleanTrack(raw) {
+      return {
+        id: String(raw.trackId || `${raw.artistName}-${raw.trackName}-${raw.collectionName}`),
+        trackName: raw.trackName || "Unknown title",
+        artistName: raw.artistName || "Unknown artist",
+        collectionName: raw.collectionName || "Unknown album",
+        primaryGenreName: raw.primaryGenreName || "Unknown",
+        releaseDate: raw.releaseDate || "",
+        previewUrl: raw.previewUrl || "",
+        artworkUrl100: raw.artworkUrl100 || "",
+        trackViewUrl: raw.trackViewUrl || ""
+      };
+    }
+
+    function genreFamily(genre) {
+      const value = normalize(genre);
+      if (/pop|dance/.test(value)) return "pop";
+      if (/rock|metal|punk|alternative|grunge|indie/.test(value)) return "rock";
+      if (/hip hop|rap|r b|soul|funk/.test(value)) return "urban";
+      if (/electronic|house|techno|edm|ambient/.test(value)) return "electronic";
+      if (/country|folk|americana|singer songwriter/.test(value)) return "roots";
+      if (/jazz|blues/.test(value)) return "jazz-blues";
+      if (/latin|reggaeton|spanish/.test(value)) return "latin";
+      return value || "unknown";
+    }
+
+    function albumArt(url, size) {
+      if (!url) return "";
+      return url.replace(/100x100bb\.(jpg|png|webp)$/i, `${size}x${size}bb.$1`);
+    }
+
+    function setMessage(text, tone) {
+      els.message.textContent = text;
+      els.message.className = `message ${tone || ""}`.trim();
+    }
+
+    function setControls(enabled) {
+      const available = Boolean(enabled && !state.gameOver);
+      els.playBtn.disabled = !available;
+      els.guessInput.disabled = !available;
+      els.guessBtn.disabled = !available;
+      els.skipBtn.disabled = !available;
+    }
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>'"]/g, char => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        "'": "&#39;",
+        "\"": "&quot;"
+      }[char]));
+    }
+
+    function buildBoard() {
+      els.board.innerHTML = "";
+      for (let index = 0; index < MAX_ATTEMPTS; index += 1) {
+        const attempt = state.attempts[index];
+        const row = document.createElement("div");
+        row.className = `try${attempt ? "" : " empty"}`;
+
+        const tiles = attempt ? attempt.tiles : Array.from({ length: 5 }, () => ({ text: "-", status: "" }));
+        for (const tileData of tiles) {
+          const tile = document.createElement("div");
+          tile.className = `chip ${tileData.status || ""}`.trim();
+          tile.textContent = tileData.text || "-";
+          tile.title = tileData.title || tileData.text || "";
+          row.appendChild(tile);
+        }
+        els.board.appendChild(row);
+      }
+    }
+
+    function updateProgress(solved) {
+      els.progress.innerHTML = "";
+      for (let index = 0; index < MAX_ATTEMPTS; index += 1) {
+        const dot = document.createElement("div");
+        dot.className = "dot";
+        if (solved) dot.classList.add("solved");
+        else if (index < state.attempts.length) dot.classList.add("used");
+        else if (index === state.attempts.length) dot.classList.add("active");
+        els.progress.appendChild(dot);
+      }
+
+      const current = Math.min(state.attempts.length, SNIPPETS.length - 1);
+      els.snippetText.textContent = state.gameOver
+        ? "Game finished"
+        : `Attempt ${state.attempts.length + 1} gives ${SNIPPETS[current]} second${SNIPPETS[current] === 1 ? "" : "s"}`;
+    }
+
+    function jsonp(url, timeoutMs = 9000) {
+      return new Promise((resolve, reject) => {
+        const callbackName = `mookPookerItunes${Date.now()}${Math.floor(Math.random() * 100000)}`;
+        const script = document.createElement("script");
+        const separator = url.includes("?") ? "&" : "?";
+        let settled = false;
+
+        const timer = window.setTimeout(() => {
+          cleanup(new Error("The music shop is taking a nap. Try again."));
+        }, timeoutMs);
+
+        function cleanup(error, data) {
+          if (settled) return;
+          settled = true;
+          window.clearTimeout(timer);
+          delete window[callbackName];
+          script.remove();
+          if (error) reject(error);
+          else resolve(data);
+        }
+
+        window[callbackName] = data => cleanup(null, data);
+        script.onerror = () => cleanup(new Error("Could not reach iTunes. Check the connection and try again."));
+        script.src = `${url}${separator}callback=${callbackName}`;
+        document.head.appendChild(script);
+      });
+    }
+
+    async function searchSongs(term, limit) {
+      const country = els.countrySelect.value;
+      const key = `${country}|${term.toLowerCase()}|${limit}`;
+      if (state.cache.has(key)) return state.cache.get(key);
+
+      const params = new URLSearchParams({
+        term,
+        country,
+        media: "music",
+        entity: "song",
+        explicit: "No",
+        limit: String(limit),
+        lang: "en_us"
+      });
+      const data = await jsonp(`https://itunes.apple.com/search?${params.toString()}`);
+      const results = (data.results || [])
+        .filter(item => item.wrapperType === "track" && item.kind === "song" && item.previewUrl)
+        .map(cleanTrack);
+
+      state.cache.set(key, results);
+      return results;
+    }
+
+    function sameSong(a, b) {
+      return String(a.id) === String(b.id)
+        || (normalize(a.trackName) === normalize(b.trackName) && normalize(a.artistName) === normalize(b.artistName));
+    }
+
+    async function targetIsSearchable(song) {
+      const query = `${song.trackName} ${song.artistName}`;
+      const results = await searchSongs(query, 12);
+      return results.some(result => sameSong(result, song));
+    }
+
+    async function findSearchableTarget(random, maxSeedTerms) {
+      const triedTerms = new Set();
+
+      for (let attempt = 0; attempt < maxSeedTerms; attempt += 1) {
+        const seedTerm = SEED_TERMS[Math.floor(random() * SEED_TERMS.length)];
+        if (triedTerms.has(seedTerm)) continue;
+        triedTerms.add(seedTerm);
+
+        const results = (await searchSongs(seedTerm, 45))
+          .filter(song => song.previewUrl && song.trackName && song.artistName)
+          .slice(0, 18);
+
+        for (const song of results) {
+          if (await targetIsSearchable(song)) return song;
+        }
+      }
+
+      return null;
+    }
+
+    async function pickTarget() {
+      const countrySeed = els.countrySelect.value.split("").reduce((total, char) => total + char.charCodeAt(0), 0);
+      const random = state.mode === "daily" ? seededRandom(todaySeed() + countrySeed) : Math.random;
+      const target = await findSearchableTarget(random, state.mode === "daily" ? 8 : 12);
+
+      if (target) return target;
+
+      if (state.mode === "daily") {
+        state.mode = "random";
+        const fallback = await findSearchableTarget(Math.random, 12);
+        if (fallback) return fallback;
+      }
+
+      throw new Error("No searchable playable preview appeared. Try Random or another store.");
+    }
+
+    function compareTrack(guess, target) {
+      const guessYear = yearOf(guess);
+      const targetYear = yearOf(target);
+      const guessGenre = genreFamily(guess.primaryGenreName);
+      const targetGenre = genreFamily(target.primaryGenreName);
+
+      const titleStatus = normalize(guess.trackName) === normalize(target.trackName)
+        ? "correct"
+        : overlapScore(guess.trackName, target.trackName) >= .45 ? "close" : "wrong";
+
+      const artistStatus = normalize(guess.artistName) === normalize(target.artistName)
+        ? "correct"
+        : overlapScore(guess.artistName, target.artistName) >= .5 ? "close" : "wrong";
+
+      const albumStatus = normalize(guess.collectionName) === normalize(target.collectionName)
+        ? "correct"
+        : overlapScore(guess.collectionName, target.collectionName) >= .4 ? "close" : "wrong";
+
+      const yearStatus = guessYear && targetYear
+        ? Math.abs(guessYear - targetYear) === 0 ? "correct" : Math.abs(guessYear - targetYear) <= 5 ? "close" : "wrong"
+        : "wrong";
+
+      const genreStatus = normalize(guess.primaryGenreName) === normalize(target.primaryGenreName)
+        ? "correct"
+        : guessGenre === targetGenre ? "close" : "wrong";
+
+      return [
+        { text: guess.trackName, status: titleStatus },
+        { text: guess.artistName, status: artistStatus },
+        { text: guess.collectionName, status: albumStatus },
+        { text: guessYear || "-", status: yearStatus, title: guess.releaseDate || "" },
+        { text: guess.primaryGenreName, status: genreStatus }
+      ];
+    }
+
+    function isExactGuess(guess, target) {
+      return String(guess.id) === String(target.id)
+        || (normalize(guess.trackName) === normalize(target.trackName) && normalize(guess.artistName) === normalize(target.artistName));
+    }
+
+    async function playSnippet() {
+      if (!state.target || state.isPlaying) return;
+      const seconds = SNIPPETS[Math.min(state.attempts.length, SNIPPETS.length - 1)];
+      window.clearTimeout(state.playTimer);
+      state.audio.pause();
+      state.audio.currentTime = 0;
+      state.audio.src = state.target.previewUrl;
+      state.isPlaying = true;
+      els.playBtn.textContent = "Playing...";
+
+      try {
+        await state.audio.play();
+        state.playTimer = window.setTimeout(() => {
+          state.audio.pause();
+          state.audio.currentTime = 0;
+          state.isPlaying = false;
+          els.playBtn.textContent = "Play snippet";
+        }, seconds * 1000);
+      } catch (error) {
+        state.isPlaying = false;
+        els.playBtn.textContent = "Play snippet";
+        setMessage("Playback needs a tap. Press Play again.", "bad");
+      }
+    }
+
+    function revealAnswer(won) {
+      state.gameOver = true;
+      setControls(false);
+      window.clearTimeout(state.playTimer);
+      state.audio.pause();
+
+      els.artWrap.classList.add("is-revealed");
+      els.cover.classList.add("is-revealed");
+      els.answer.classList.add("open");
+      els.answerArt.src = albumArt(state.target.artworkUrl100, 300);
+      els.answerTitle.textContent = state.target.trackName;
+      els.answerMeta.textContent = `${state.target.artistName} / ${yearOf(state.target) || "Unknown year"} / ${state.target.primaryGenreName}`;
+      els.answerAlbum.textContent = state.target.collectionName;
+      els.answerLink.href = state.target.trackViewUrl || "#";
+
+      updateProgress(won);
+      setMessage(won ? "You found it. Sweet little victory." : "Out of tries. The answer is here.", won ? "good" : "bad");
+    }
+
+    function submitAttempt(guess) {
+      if (!guess || state.gameOver || !state.target) return;
+      const repeated = state.attempts.some(attempt => attempt.guess && String(attempt.guess.id) === String(guess.id));
+      if (repeated) {
+        setMessage("That song already had its turn.", "bad");
+        return;
+      }
+
+      state.attempts.push({ guess, tiles: compareTrack(guess, state.target) });
+      state.selectedGuess = null;
+      els.guessInput.value = "";
+      clearSuggestions();
+      buildBoard();
+
+      if (isExactGuess(guess, state.target)) {
+        revealAnswer(true);
+      } else if (state.attempts.length >= MAX_ATTEMPTS) {
+        revealAnswer(false);
+      } else {
+        updateProgress(false);
+        setMessage("Not this one. A longer snippet unlocked.");
+      }
+    }
+
+    function skipAttempt() {
+      if (state.gameOver || !state.target) return;
+      state.attempts.push({
+        guess: { id: `skip-${state.attempts.length}` },
+        tiles: [
+          { text: "Skipped", status: "wrong" },
+          { text: "-", status: "wrong" },
+          { text: "-", status: "wrong" },
+          { text: "-", status: "wrong" },
+          { text: "-", status: "wrong" }
+        ]
+      });
+      buildBoard();
+
+      if (state.attempts.length >= MAX_ATTEMPTS) {
+        revealAnswer(false);
+      } else {
+        updateProgress(false);
+        setMessage("Skipped. A longer snippet unlocked.");
+      }
+    }
+
+    function renderSuggestions(results) {
+      state.searchResults = results;
+      state.suggestionIndex = -1;
+      els.suggestions.innerHTML = "";
+
+      if (!results.length) {
+        clearSuggestions();
+        return;
+      }
+
+      results.forEach((song, index) => {
+        const option = document.createElement("div");
+        option.className = "suggestion";
+        option.setAttribute("role", "option");
+        option.setAttribute("aria-selected", "false");
+        option.innerHTML = `
+          <img src="${albumArt(song.artworkUrl100, 100)}" alt="" />
+          <div>
+            <strong>${escapeHtml(song.trackName)}</strong>
+            <span>${escapeHtml(song.artistName)} / ${escapeHtml(song.collectionName)} / ${yearOf(song) || ""}</span>
+          </div>
+        `;
+        option.addEventListener("mousedown", event => {
+          event.preventDefault();
+          selectSuggestion(index);
+        });
+        els.suggestions.appendChild(option);
+      });
+
+      els.suggestions.classList.add("open");
+    }
+
+    function selectSuggestion(index) {
+      const song = state.searchResults[index];
+      if (!song) return;
+      state.selectedGuess = song;
+      els.guessInput.value = `${song.trackName} - ${song.artistName}`;
+      clearSuggestions();
+      els.guessInput.focus();
+    }
+
+    function clearSuggestions() {
+      els.suggestions.innerHTML = "";
+      els.suggestions.classList.remove("open");
+      state.searchResults = [];
+      state.suggestionIndex = -1;
+    }
+
+    let searchTimer = 0;
+    function queueSearch() {
+      window.clearTimeout(searchTimer);
+      state.selectedGuess = null;
+      const term = els.guessInput.value.trim();
+
+      if (term.length < 2) {
+        clearSuggestions();
+        return;
+      }
+
+      searchTimer = window.setTimeout(async () => {
+        const requestId = ++state.requestId;
+        try {
+          const results = await searchSongs(term, 8);
+          if (requestId === state.requestId) renderSuggestions(results);
+        } catch (error) {
+          if (requestId === state.requestId) {
+            clearSuggestions();
+            setMessage(error.message || "Search took a wrong turn.", "bad");
+          }
+        }
+      }, 350);
+    }
+
+    async function guessFromInput() {
+      if (state.selectedGuess) {
+        submitAttempt(state.selectedGuess);
+        return;
+      }
+
+      const term = els.guessInput.value.trim();
+      if (!term) {
+        setMessage("Search for a song first.", "bad");
+        return;
+      }
+
+      setMessage("Looking for that song...");
+      try {
+        const results = await searchSongs(term, 5);
+        if (!results.length) {
+          setMessage("No playable preview found for that guess.", "bad");
+          return;
+        }
+        submitAttempt(results[0]);
+      } catch (error) {
+        setMessage(error.message || "Search took a wrong turn.", "bad");
+      }
+    }
+
+    function moveSuggestion(event) {
+      if (!els.suggestions.classList.contains("open")) return;
+      const items = Array.from(els.suggestions.querySelectorAll(".suggestion"));
+      if (!items.length) return;
+
+      if (event.key === "ArrowDown") {
+        event.preventDefault();
+        state.suggestionIndex = Math.min(items.length - 1, state.suggestionIndex + 1);
+      } else if (event.key === "ArrowUp") {
+        event.preventDefault();
+        state.suggestionIndex = Math.max(0, state.suggestionIndex - 1);
+      } else if (event.key === "Enter" && state.suggestionIndex >= 0) {
+        event.preventDefault();
+        selectSuggestion(state.suggestionIndex);
+        return;
+      } else if (event.key === "Escape") {
+        clearSuggestions();
+        return;
+      } else {
+        return;
+      }
+
+      items.forEach((item, index) => {
+        const active = index === state.suggestionIndex;
+        item.classList.toggle("active", active);
+        item.setAttribute("aria-selected", String(active));
+        if (active) item.scrollIntoView({ block: "nearest" });
+      });
+    }
+
+    async function startGame(mode) {
+      state.mode = mode;
+      state.target = null;
+      state.attempts = [];
+      state.gameOver = false;
+      state.isPlaying = false;
+      state.selectedGuess = null;
+      state.cache.clear();
+      state.audio.pause();
+      state.audio.removeAttribute("src");
+      window.clearTimeout(state.playTimer);
+
+      els.answer.classList.remove("open");
+      els.artWrap.classList.remove("is-revealed");
+      els.cover.classList.remove("is-visible", "is-revealed");
+      els.cover.removeAttribute("src");
+      els.guessInput.value = "";
+      els.loadStatus.textContent = "Loading a song...";
+      els.playBtn.textContent = "Play snippet";
+      clearSuggestions();
+      buildBoard();
+      updateProgress(false);
+      setControls(false);
+      setMessage("");
+
+      try {
+        const target = await pickTarget();
+        state.target = target;
+        state.audio.preload = "auto";
+        state.audio.src = target.previewUrl;
+
+        const art = albumArt(target.artworkUrl100, 600);
+        if (art) {
+          els.cover.onload = () => els.cover.classList.add("is-visible");
+          els.cover.src = art;
+        }
+
+        els.loadStatus.textContent = mode === "daily" ? "Daily song ready" : "Random song ready";
+        setControls(true);
+        setMessage("Press Play, then make your guess.");
+      } catch (error) {
+        els.loadStatus.textContent = "Could not load";
+        setMessage(error.message || "Could not start the game.", "bad");
+      }
+    }
+
+    els.playBtn.addEventListener("click", playSnippet);
+    els.guessBtn.addEventListener("click", guessFromInput);
+    els.skipBtn.addEventListener("click", skipAttempt);
+    els.dailyBtn.addEventListener("click", () => startGame("daily"));
+    els.randomBtn.addEventListener("click", () => startGame("random"));
+    els.countrySelect.addEventListener("change", () => startGame(state.mode));
+    els.guessInput.addEventListener("input", queueSearch);
+    els.guessInput.addEventListener("keydown", event => {
+      moveSuggestion(event);
+      if (event.key === "Enter" && !els.suggestions.classList.contains("open")) {
+        event.preventDefault();
+        guessFromInput();
+      }
+    });
+    document.addEventListener("click", event => {
+      if (!els.suggestions.contains(event.target) && event.target !== els.guessInput) {
+        clearSuggestions();
+      }
+    });
+    state.audio.addEventListener("ended", () => {
+      window.clearTimeout(state.playTimer);
+      state.isPlaying = false;
+      els.playBtn.textContent = "Play snippet";
+    });
+
+    buildBoard();
+    updateProgress(false);
+    startGame("daily");
+  </script>
+</body>
+</html>
