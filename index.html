@@ -730,13 +730,6 @@
       </div>
       <div class="toolbar" aria-label="Game controls">
         <button id="randomBtn" class="primary" type="button">Random</button>
-        <select id="countrySelect" class="select" aria-label="iTunes Store country">
-          <option value="US">US store</option>
-          <option value="GB">UK store</option>
-          <option value="IL">Israel store</option>
-          <option value="JP">Japan store</option>
-          <option value="ES">Spain store</option>
-        </select>
       </div>
     </header>
 
@@ -811,6 +804,7 @@
 
     const MAX_ATTEMPTS = 6;
     const SNIPPETS = [0.5, 1, 2, 3.5, 5.5, 8];
+    const STORE_COUNTRIES = ["US", "GB", "IL", "JP", "ES"];
     const SEED_TERMS = [
       "Taylor Swift", "The Weeknd", "Billie Eilish", "Dua Lipa", "Ed Sheeran",
       "Ariana Grande", "Coldplay", "Bruno Mars", "Lady Gaga", "Queen",
@@ -833,6 +827,7 @@
       requestId: 0,
       searchResults: [],
       selectedGuess: null,
+      country: "US",
       suggestionIndex: -1
     };
 
@@ -845,7 +840,6 @@
       answerTitle: document.getElementById("answerTitle"),
       artWrap: document.getElementById("artWrap"),
       board: document.getElementById("board"),
-      countrySelect: document.getElementById("countrySelect"),
       cover: document.getElementById("cover"),
       guessBtn: document.getElementById("guessBtn"),
       guessInput: document.getElementById("guessInput"),
@@ -947,6 +941,10 @@
       }[char]));
     }
 
+    function randomStoreCountry() {
+      return STORE_COUNTRIES[Math.floor(Math.random() * STORE_COUNTRIES.length)];
+    }
+
     function buildBoard() {
       els.board.innerHTML = "";
       for (let index = 0; index < MAX_ATTEMPTS; index += 1) {
@@ -1016,7 +1014,7 @@
     }
 
     async function searchSongs(term, limit) {
-      const country = els.countrySelect.value;
+      const country = state.country;
       const key = `${country}|${term.toLowerCase()}|${limit}`;
       if (state.cache.has(key)) return state.cache.get(key);
 
@@ -1074,7 +1072,7 @@
 
       if (target) return target;
 
-      throw new Error("No searchable playable preview appeared. Try another store.");
+      throw new Error("No searchable playable preview appeared. Try again.");
     }
 
     function compareTrack(guess, target) {
@@ -1336,6 +1334,7 @@
     }
 
     async function startGame() {
+      state.country = randomStoreCountry();
       state.target = null;
       state.attempts = [];
       state.gameOver = false;
@@ -1384,7 +1383,6 @@
     els.guessBtn.addEventListener("click", guessFromInput);
     els.skipBtn.addEventListener("click", skipAttempt);
     els.randomBtn.addEventListener("click", startGame);
-    els.countrySelect.addEventListener("change", startGame);
     els.guessInput.addEventListener("input", queueSearch);
     els.guessInput.addEventListener("keydown", event => {
       moveSuggestion(event);
