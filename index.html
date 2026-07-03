@@ -906,7 +906,10 @@
       "Nirvana", "Radiohead", "Arctic Monkeys", "The Beatles", "Fleetwood Mac",
       "Oasis", "Sia", "Maroon 5", "Post Malone", "Olivia Rodrigo",
       "Sabrina Carpenter", "Chappell Roan", "Miley Cyrus", "ABBA", "Elton John",
-      "David Bowie", "Prince", "Tame Impala", "Lana Del Rey", "Linkin Park"
+      "David Bowie", "Prince", "Tame Impala", "Lana Del Rey", "Linkin Park",
+      "2000s pop", "90s rock", "hip hop hits", "movie soundtrack", "dance hits",
+      "classic rock", "indie pop", "love songs", "summer hits", "80s hits",
+      "alternative hits", "pop punk", "r b hits", "one hit wonders", "viral hits"
     ];
 
     const state = {
@@ -1161,6 +1164,29 @@
         || (normalize(a.trackName) === normalize(b.trackName) && normalize(a.artistName) === normalize(b.artistName));
     }
 
+    function shuffle(items, random = Math.random) {
+      const shuffled = [...items];
+      for (let index = shuffled.length - 1; index > 0; index -= 1) {
+        const swapIndex = Math.floor(random() * (index + 1));
+        [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]];
+      }
+      return shuffled;
+    }
+
+    function songKey(song) {
+      return `${normalize(song.trackName)}|${normalize(song.artistName)}`;
+    }
+
+    function dedupeSongs(songs) {
+      const seen = new Set();
+      return songs.filter(song => {
+        const key = songKey(song);
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+    }
+
     async function targetIsSearchable(song) {
       const query = `${song.trackName} ${song.artistName}`;
       const results = await searchSongs(query, 12);
@@ -1175,11 +1201,13 @@
         if (triedTerms.has(seedTerm)) continue;
         triedTerms.add(seedTerm);
 
-        const results = (await searchSongs(seedTerm, 45))
-          .filter(song => song.previewUrl && song.trackName && song.artistName)
-          .slice(0, 18);
+        const candidates = dedupeSongs(
+          (await searchSongs(seedTerm, 50))
+            .filter(song => song.previewUrl && song.trackName && song.artistName)
+            .slice(0, 30)
+        );
 
-        for (const song of results) {
+        for (const song of shuffle(candidates, random)) {
           if (await targetIsSearchable(song)) return song;
         }
       }
