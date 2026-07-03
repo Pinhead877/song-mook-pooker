@@ -696,11 +696,71 @@
       }
 
       .board-panel {
-        overflow-x: auto;
+        overflow: visible;
       }
 
-      .board-inner {
-        min-width: 610px;
+      .board-head {
+        display: none;
+      }
+
+      .board {
+        gap: 9px;
+      }
+
+      .try {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 6px;
+      }
+
+      .chip {
+        min-height: 40px;
+        padding: 6px 7px;
+        font-size: .78rem;
+      }
+
+      .try:not(.empty) .chip {
+        display: grid;
+        gap: 3px;
+        align-content: center;
+        justify-items: center;
+      }
+
+      .try:not(.empty) .chip::before {
+        content: attr(data-label);
+        color: rgba(62, 53, 72, .68);
+        font-size: .62rem;
+        line-height: 1;
+        text-transform: uppercase;
+      }
+
+      .try .chip:nth-child(1),
+      .try .chip:nth-child(3),
+      .try .chip:nth-child(5) {
+        grid-column: 1 / -1;
+      }
+
+      .try .chip:nth-child(1) {
+        order: 1;
+      }
+
+      .try .chip:nth-child(2) {
+        order: 2;
+      }
+
+      .try .chip:nth-child(4) {
+        order: 3;
+      }
+
+      .try .chip:nth-child(3) {
+        order: 4;
+      }
+
+      .try .chip:nth-child(5) {
+        order: 5;
+      }
+
+      .legend {
+        margin-top: 10px;
       }
     }
 
@@ -947,15 +1007,17 @@
 
     function buildBoard() {
       els.board.innerHTML = "";
+      const clueLabels = ["Title", "Artist", "Album", "Year", "Genre"];
       for (let index = 0; index < MAX_ATTEMPTS; index += 1) {
         const attempt = state.attempts[index];
         const row = document.createElement("div");
         row.className = `try${attempt ? "" : " empty"}`;
 
         const tiles = attempt ? attempt.tiles : Array.from({ length: 5 }, () => ({ text: "-", status: "" }));
-        for (const tileData of tiles) {
+        for (const [tileIndex, tileData] of tiles.entries()) {
           const tile = document.createElement("div");
           tile.className = `chip ${tileData.status || ""}`.trim();
+          tile.dataset.label = clueLabels[tileIndex] || "";
           tile.textContent = tileData.text || "-";
           tile.title = tileData.title || tileData.text || "";
           row.appendChild(tile);
