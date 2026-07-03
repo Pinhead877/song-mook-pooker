@@ -1062,7 +1062,11 @@
       }
 
       const clueLabels = ["Title", "Artist", "Album", "Year", "Genre"];
-      for (const [attemptIndex, attempt] of state.attempts.entries()) {
+      const attemptsNewestFirst = state.attempts
+        .map((attempt, attemptIndex) => ({ attempt, attemptIndex }))
+        .reverse();
+
+      for (const { attempt, attemptIndex } of attemptsNewestFirst) {
         const group = document.createElement("div");
         group.className = "try-group";
 
