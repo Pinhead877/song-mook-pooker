@@ -561,6 +561,18 @@
       gap: 8px;
     }
 
+    .board-panel:not(.has-attempts) .board-head {
+      display: none;
+    }
+
+    .board-empty {
+      margin: 4px 0;
+      color: var(--soft-ink);
+      font-weight: 800;
+      line-height: 1.4;
+      text-align: center;
+    }
+
     .try {
       display: grid;
       grid-template-columns: 1.25fr 1fr .95fr .48fr .7fr;
@@ -1007,14 +1019,22 @@
 
     function buildBoard() {
       els.board.innerHTML = "";
-      const clueLabels = ["Title", "Artist", "Album", "Year", "Genre"];
-      for (let index = 0; index < MAX_ATTEMPTS; index += 1) {
-        const attempt = state.attempts[index];
-        const row = document.createElement("div");
-        row.className = `try${attempt ? "" : " empty"}`;
+      els.board.closest(".board-panel").classList.toggle("has-attempts", state.attempts.length > 0);
 
-        const tiles = attempt ? attempt.tiles : Array.from({ length: 5 }, () => ({ text: "-", status: "" }));
-        for (const [tileIndex, tileData] of tiles.entries()) {
+      if (!state.attempts.length) {
+        const empty = document.createElement("p");
+        empty.className = "board-empty";
+        empty.textContent = "Your guesses will appear here after you make them.";
+        els.board.appendChild(empty);
+        return;
+      }
+
+      const clueLabels = ["Title", "Artist", "Album", "Year", "Genre"];
+      for (const attempt of state.attempts) {
+        const row = document.createElement("div");
+        row.className = "try";
+
+        for (const [tileIndex, tileData] of attempt.tiles.entries()) {
           const tile = document.createElement("div");
           tile.className = `chip ${tileData.status || ""}`.trim();
           tile.dataset.label = clueLabels[tileIndex] || "";
