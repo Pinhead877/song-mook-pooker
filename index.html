@@ -573,6 +573,25 @@
       text-align: center;
     }
 
+    .try-group {
+      display: grid;
+      gap: 6px;
+    }
+
+    .try-label {
+      justify-self: start;
+      padding: 4px 8px;
+      border: 2px solid #4f4158;
+      border-radius: var(--radius);
+      background: var(--blue);
+      color: var(--ink);
+      box-shadow: 2px 2px 0 rgba(79, 65, 88, .2);
+      font-size: .72rem;
+      font-weight: 900;
+      line-height: 1;
+      text-transform: uppercase;
+    }
+
     .try {
       display: grid;
       grid-template-columns: 1.25fr 1fr .95fr .48fr .7fr;
@@ -1030,7 +1049,15 @@
       }
 
       const clueLabels = ["Title", "Artist", "Album", "Year", "Genre"];
-      for (const attempt of state.attempts) {
+      for (const [attemptIndex, attempt] of state.attempts.entries()) {
+        const group = document.createElement("div");
+        group.className = "try-group";
+
+        const label = document.createElement("div");
+        label.className = "try-label";
+        label.textContent = `Try ${attemptIndex + 1} of ${MAX_ATTEMPTS}`;
+        group.appendChild(label);
+
         const row = document.createElement("div");
         row.className = "try";
 
@@ -1042,7 +1069,8 @@
           tile.title = tileData.title || tileData.text || "";
           row.appendChild(tile);
         }
-        els.board.appendChild(row);
+        group.appendChild(row);
+        els.board.appendChild(group);
       }
     }
 
