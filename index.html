@@ -1101,7 +1101,7 @@
 
       const current = Math.min(state.attempts.length, SNIPPETS.length - 1);
       els.snippetText.textContent = state.gameOver
-        ? "Game finished"
+        ? ""
         : `Attempt ${state.attempts.length + 1} gives ${formatSnippetDuration(SNIPPETS[current])}`;
     }
 
