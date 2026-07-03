@@ -613,10 +613,21 @@
       padding: 6px 8px;
       border: 2px solid #4f4158;
       border-radius: var(--radius);
-      background: var(--milk);
-      color: var(--soft-ink);
+      color: var(--ink);
       font-size: .82rem;
       font-weight: 900;
+    }
+
+    .legend .exact {
+      background: var(--mint);
+    }
+
+    .legend .close {
+      background: var(--lemon);
+    }
+
+    .legend .miss {
+      background: var(--wrong);
     }
 
     .footer {
@@ -718,8 +729,7 @@
         <p class="subtitle">Hear a tiny preview, make a guess, and use soft little clues to find the hidden song in six tries.</p>
       </div>
       <div class="toolbar" aria-label="Game controls">
-        <button id="dailyBtn" class="primary" type="button">Daily</button>
-        <button id="randomBtn" class="secondary" type="button">Random</button>
+        <button id="randomBtn" class="primary" type="button">Random</button>
         <select id="countrySelect" class="select" aria-label="iTunes Store country">
           <option value="US">US store</option>
           <option value="GB">UK store</option>
@@ -746,7 +756,7 @@
           <div class="snippet-card">
             <div class="play-row">
               <button id="playBtn" class="primary" type="button" disabled>Play snippet</button>
-              <p id="snippetText" class="snippet-label">Attempt 1 gives 1 second</p>
+              <p id="snippetText" class="snippet-label">Attempt 1 gives 0.5 seconds</p>
             </div>
             <div id="progress" class="progress" aria-label="Attempt progress"></div>
           </div>
@@ -785,9 +795,9 @@
           </div>
           <div id="board" class="board"></div>
           <div class="legend" aria-label="Clue legend">
-            <span>Mint: exact</span>
-            <span>Lemon: close</span>
-            <span>Cloud: miss</span>
+            <span class="exact">Mint: exact</span>
+            <span class="close">Lemon: close</span>
+            <span class="miss">Cloud: miss</span>
           </div>
         </div>
       </section>
@@ -800,7 +810,7 @@
     "use strict";
 
     const MAX_ATTEMPTS = 6;
-    const SNIPPETS = [1, 2, 4, 7, 11, 16];
+    const SNIPPETS = [0.5, 1, 2, 3.5, 5.5, 8];
     const SEED_TERMS = [
       "Taylor Swift", "The Weeknd", "Billie Eilish", "Dua Lipa", "Ed Sheeran",
       "Ariana Grande", "Coldplay", "Bruno Mars", "Lady Gaga", "Queen",
@@ -819,7 +829,6 @@
       cache: new Map(),
       gameOver: false,
       isPlaying: false,
-      mode: "daily",
       playTimer: 0,
       requestId: 0,
       searchResults: [],
@@ -838,7 +847,6 @@
       board: document.getElementById("board"),
       countrySelect: document.getElementById("countrySelect"),
       cover: document.getElementById("cover"),
-      dailyBtn: document.getElementById("dailyBtn"),
       guessBtn: document.getElementById("guessBtn"),
       guessInput: document.getElementById("guessInput"),
       loadStatus: document.getElementById("loadStatus"),
@@ -850,20 +858,6 @@
       snippetText: document.getElementById("snippetText"),
       suggestions: document.getElementById("suggestions")
     };
-
-    function seededRandom(seed) {
-      let value = seed % 2147483647;
-      if (value <= 0) value += 2147483646;
-      return function next() {
-        value = value * 16807 % 2147483647;
-        return (value - 1) / 2147483646;
-      };
-    }
-
-    function todaySeed() {
-      const now = new Date();
-      return Number(`${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}${String(now.getDate()).padStart(2, "0")}`);
-    }
 
     function normalize(value) {
       return String(value || "")
@@ -972,6 +966,10 @@
       }
     }
 
+    function formatSnippetDuration(seconds) {
+      return `${seconds} second${seconds === 1 ? "" : "s"}`;
+    }
+
     function updateProgress(solved) {
       els.progress.innerHTML = "";
       for (let index = 0; index < MAX_ATTEMPTS; index += 1) {
@@ -986,7 +984,7 @@
       const current = Math.min(state.attempts.length, SNIPPETS.length - 1);
       els.snippetText.textContent = state.gameOver
         ? "Game finished"
-        : `Attempt ${state.attempts.length + 1} gives ${SNIPPETS[current]} second${SNIPPETS[current] === 1 ? "" : "s"}`;
+        : `Attempt ${state.attempts.length + 1} gives ${formatSnippetDuration(SNIPPETS[current])}`;
     }
 
     function jsonp(url, timeoutMs = 9000) {
@@ -1072,19 +1070,11 @@
     }
 
     async function pickTarget() {
-      const countrySeed = els.countrySelect.value.split("").reduce((total, char) => total + char.charCodeAt(0), 0);
-      const random = state.mode === "daily" ? seededRandom(todaySeed() + countrySeed) : Math.random;
-      const target = await findSearchableTarget(random, state.mode === "daily" ? 8 : 12);
+      const target = await findSearchableTarget(Math.random, 12);
 
       if (target) return target;
 
-      if (state.mode === "daily") {
-        state.mode = "random";
-        const fallback = await findSearchableTarget(Math.random, 12);
-        if (fallback) return fallback;
-      }
-
-      throw new Error("No searchable playable preview appeared. Try Random or another store.");
+      throw new Error("No searchable playable preview appeared. Try another store.");
     }
 
     function compareTrack(guess, target) {
@@ -1345,8 +1335,7 @@
       });
     }
 
-    async function startGame(mode) {
-      state.mode = mode;
+    async function startGame() {
       state.target = null;
       state.attempts = [];
       state.gameOver = false;
@@ -1382,7 +1371,7 @@
           els.cover.src = art;
         }
 
-        els.loadStatus.textContent = mode === "daily" ? "Daily song ready" : "Random song ready";
+        els.loadStatus.textContent = "Random song ready";
         setControls(true);
         setMessage("Press Play, then make your guess.");
       } catch (error) {
@@ -1394,9 +1383,8 @@
     els.playBtn.addEventListener("click", playSnippet);
     els.guessBtn.addEventListener("click", guessFromInput);
     els.skipBtn.addEventListener("click", skipAttempt);
-    els.dailyBtn.addEventListener("click", () => startGame("daily"));
-    els.randomBtn.addEventListener("click", () => startGame("random"));
-    els.countrySelect.addEventListener("change", () => startGame(state.mode));
+    els.randomBtn.addEventListener("click", startGame);
+    els.countrySelect.addEventListener("change", startGame);
     els.guessInput.addEventListener("input", queueSearch);
     els.guessInput.addEventListener("keydown", event => {
       moveSuggestion(event);
@@ -1418,7 +1406,7 @@
 
     buildBoard();
     updateProgress(false);
-    startGame("daily");
+    startGame();
   </script>
 </body>
 </html>
